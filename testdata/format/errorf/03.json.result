@@ -1,0 +1,7 @@
+error
+github.com/<user>/errors.(*TestFmtErrorf).Run
+	<path>/github.com/<user>/errors/format_test.go:<line>
+github.com/<user>/errors.TestFormatErrorf
+	<path>/github.com/<user>/errors/format_test.go:<line>
+testing.tRunner
+runtime.goexit

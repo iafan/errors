@@ -1,0 +1,7 @@
+{
+	"errors": [
+		{"msg":"error with space"},
+		{"msg":"context"}
+	],
+	"format":"%q"
+}

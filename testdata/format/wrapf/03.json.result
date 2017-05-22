@@ -1,0 +1,8 @@
+EOF
+error2
+github.com/<user>/errors.(*TestFmtWrapf).Run
+	<path>/github.com/<user>/errors/format_test.go:<line>
+github.com/<user>/errors.TestFormatWrapf
+	<path>/github.com/<user>/errors/format_test.go:<line>
+testing.tRunner
+runtime.goexit

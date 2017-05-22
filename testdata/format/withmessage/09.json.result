@@ -1,0 +1,11 @@
+EOF
+message
+github.com/<user>/errors.(*TestFmtWithMessage).Run
+	<path>/github.com/<user>/errors/format_test.go:<line>
+github.com/<user>/errors.TestFormatWithMessage
+	<path>/github.com/<user>/errors/format_test.go:<line>
+testing.tRunner
+runtime.goexit
+addition0
+addition1
+addition2
