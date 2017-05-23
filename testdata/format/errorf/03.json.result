@@ -1,5 +1,5 @@
 error
-github.com/<user>/errors.(*TestFmtErrorf).Run
+github.com/<user>/errors.TestFormatErrorf.func1
 	<path>/github.com/<user>/errors/format_test.go:<line>
 github.com/<user>/errors.TestFormatErrorf
 	<path>/github.com/<user>/errors/format_test.go:<line>

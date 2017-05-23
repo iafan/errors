@@ -1,13 +1,13 @@
 EOF
 error1
-github.com/<user>/errors.(*TestFmtWrap).Run
+github.com/<user>/errors.TestFormatWrap.func1
 	<path>/github.com/<user>/errors/format_test.go:<line>
 github.com/<user>/errors.TestFormatWrap
 	<path>/github.com/<user>/errors/format_test.go:<line>
 testing.tRunner
 runtime.goexit
 error2
-github.com/<user>/errors.(*TestFmtWrap).Run
+github.com/<user>/errors.TestFormatWrap.func1
 	<path>/github.com/<user>/errors/format_test.go:<line>
 github.com/<user>/errors.TestFormatWrap
 	<path>/github.com/<user>/errors/format_test.go:<line>

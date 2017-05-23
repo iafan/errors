@@ -11,277 +11,200 @@ import (
 	"github.com/iafan/agenda"
 )
 
-// Test New()
-
-type TestFmtNew struct {
-	input struct {
-		Msg string `json:"msg"`
-		Fmt string `json:"format"`
-	}
-	output string
-}
-
-func (t *TestFmtNew) UnmarshalInput(data []byte) error {
-	return json.Unmarshal(data, &t.input)
-}
-
-func (t *TestFmtNew) Run() error {
-	t.output = fmt.Sprintf(t.input.Fmt, New(t.input.Msg))
-	return nil
-}
-
-func (t *TestFmtNew) MarshalOutput() ([]byte, error) {
-	return []byte(cleanupErrorStackTraces(t.output)), nil
-}
-
 func TestFormatNew(t *testing.T) {
-	agenda.Run(t, "testdata/format/new", &TestFmtNew{})
-}
+	agenda.Run(t, "testdata/format/new", func(path string, data []byte) ([]byte, error) {
+		in := struct {
+			Msg string `json:"msg"`
+			Fmt string `json:"format"`
+		}{}
 
-// Test Errorf()
+		if err := json.Unmarshal(data, &in); err != nil {
+			return nil, err
+		}
 
-type TestFmtErrorf struct {
-	input struct {
-		Msg string `json:"msg"`
-		Fmt string `json:"format"`
-	}
-	output string
-}
-
-func (t *TestFmtErrorf) UnmarshalInput(data []byte) error {
-	return json.Unmarshal(data, &t.input)
-}
-
-func (t *TestFmtErrorf) Run() error {
-	t.output = fmt.Sprintf(t.input.Fmt, Errorf("%s", t.input.Msg))
-	return nil
-}
-
-func (t *TestFmtErrorf) MarshalOutput() ([]byte, error) {
-	return []byte(cleanupErrorStackTraces(t.output)), nil
+		out := fmt.Sprintf(in.Fmt, New(in.Msg))
+		return []byte(cleanupErrorStackTraces(out)), nil
+	})
 }
 
 func TestFormatErrorf(t *testing.T) {
-	agenda.Run(t, "testdata/format/errorf", &TestFmtErrorf{})
-}
-
-// Test Wrap()
-
-type TestFmtWrap struct {
-	input struct {
-		Errors []struct {
+	agenda.Run(t, "testdata/format/errorf", func(path string, data []byte) ([]byte, error) {
+		in := struct {
 			Msg string `json:"msg"`
-		} `json:"errors"`
-		Fmt string `json:"format"`
-	}
-	output string
-}
+			Fmt string `json:"format"`
+		}{}
 
-func (t *TestFmtWrap) UnmarshalInput(data []byte) error {
-	return json.Unmarshal(data, &t.input)
-}
-
-func (t *TestFmtWrap) Run() error {
-	var wrapped error
-	for _, e := range t.input.Errors {
-		if wrapped == nil {
-			wrapped = io.EOF
-			if e.Msg != "" {
-				wrapped = New(e.Msg)
-			}
-		} else {
-			wrapped = Wrap(wrapped, e.Msg)
+		if err := json.Unmarshal(data, &in); err != nil {
+			return nil, err
 		}
-	}
 
-	t.output = fmt.Sprintf(t.input.Fmt, wrapped)
-	return nil
-}
-
-func (t *TestFmtWrap) MarshalOutput() ([]byte, error) {
-	return []byte(cleanupErrorStackTraces(t.output)), nil
+		out := fmt.Sprintf(in.Fmt, Errorf("%s", in.Msg))
+		return []byte(cleanupErrorStackTraces(out)), nil
+	})
 }
 
 func TestFormatWrap(t *testing.T) {
-	agenda.Run(t, "testdata/format/wrap", &TestFmtWrap{})
-}
+	agenda.Run(t, "testdata/format/wrap", func(path string, data []byte) ([]byte, error) {
+		in := struct {
+			Errors []struct {
+				Msg string `json:"msg"`
+			} `json:"errors"`
+			Fmt string `json:"format"`
+		}{}
 
-// Test Wrapf()
-
-type TestFmtWrapf struct {
-	input struct {
-		Errors []struct {
-			Msg string `json:"msg"`
-			Val int    `json:"val"`
-		} `json:"errors"`
-		Fmt string `json:"format"`
-	}
-	output string
-}
-
-func (t *TestFmtWrapf) UnmarshalInput(data []byte) error {
-	return json.Unmarshal(data, &t.input)
-}
-
-func (t *TestFmtWrapf) Run() error {
-	var wrapped error
-	for _, e := range t.input.Errors {
-		if wrapped == nil {
-			wrapped = io.EOF
-			if e.Msg != "" {
-				wrapped = New(e.Msg)
-			}
-		} else {
-			wrapped = Wrapf(wrapped, e.Msg, e.Val)
+		if err := json.Unmarshal(data, &in); err != nil {
+			return nil, err
 		}
-	}
 
-	t.output = fmt.Sprintf(t.input.Fmt, wrapped)
-	return nil
-}
+		var wrapped error
+		for _, e := range in.Errors {
+			if wrapped == nil {
+				wrapped = io.EOF
+				if e.Msg != "" {
+					wrapped = New(e.Msg)
+				}
+			} else {
+				wrapped = Wrap(wrapped, e.Msg)
+			}
+		}
 
-func (t *TestFmtWrapf) MarshalOutput() ([]byte, error) {
-	return []byte(cleanupErrorStackTraces(t.output)), nil
+		out := fmt.Sprintf(in.Fmt, wrapped)
+		return []byte(cleanupErrorStackTraces(out)), nil
+	})
 }
 
 func TestFormatWrapf(t *testing.T) {
-	agenda.Run(t, "testdata/format/wrapf", &TestFmtWrapf{})
-}
+	agenda.Run(t, "testdata/format/wrapf", func(path string, data []byte) ([]byte, error) {
+		in := struct {
+			Errors []struct {
+				Msg string `json:"msg"`
+				Val int    `json:"val"`
+			} `json:"errors"`
+			Fmt string `json:"format"`
+		}{}
 
-// Test WithStack()
-
-type TestFmtWithStack struct {
-	input struct {
-		Errors []struct {
-			Msg string `json:"msg"`
-		} `json:"errors"`
-		ExtraStacks int    `json:"extra_stacks"`
-		Fmt         string `json:"format"`
-	}
-	output string
-}
-
-func (t *TestFmtWithStack) UnmarshalInput(data []byte) error {
-	return json.Unmarshal(data, &t.input)
-}
-
-func (t *TestFmtWithStack) Run() error {
-	var wrapped error
-	for _, e := range t.input.Errors {
-		if wrapped == nil {
-			wrapped = io.EOF
-			if e.Msg != "" {
-				wrapped = New(e.Msg)
-			}
-		} else {
-			wrapped = Wrap(wrapped, e.Msg)
+		if err := json.Unmarshal(data, &in); err != nil {
+			return nil, err
 		}
-	}
-	for i := 0; i < 1+t.input.ExtraStacks; i++ {
-		wrapped = WithStack(wrapped)
-	}
 
-	t.output = fmt.Sprintf(t.input.Fmt, wrapped)
-	return nil
-}
+		var wrapped error
+		for _, e := range in.Errors {
+			if wrapped == nil {
+				wrapped = io.EOF
+				if e.Msg != "" {
+					wrapped = New(e.Msg)
+				}
+			} else {
+				wrapped = Wrapf(wrapped, e.Msg, e.Val)
+			}
+		}
 
-func (t *TestFmtWithStack) MarshalOutput() ([]byte, error) {
-	return []byte(cleanupErrorStackTraces(t.output)), nil
+		out := fmt.Sprintf(in.Fmt, wrapped)
+		return []byte(cleanupErrorStackTraces(out)), nil
+	})
 }
 
 func TestFormatWithStack(t *testing.T) {
-	agenda.Run(t, "testdata/format/withstack", &TestFmtWithStack{})
-}
+	agenda.Run(t, "testdata/format/withstack", func(path string, data []byte) ([]byte, error) {
+		in := struct {
+			Errors []struct {
+				Msg string `json:"msg"`
+			} `json:"errors"`
+			ExtraStacks int    `json:"extra_stacks"`
+			Fmt         string `json:"format"`
+		}{}
 
-// Test WithMessage()
-
-type TestFmtWithMessage struct {
-	input struct {
-		Errors []struct {
-			Msg string `json:"msg"`
-		} `json:"errors"`
-		ExtraMsgs int    `json:"extra_msgs"`
-		Fmt       string `json:"format"`
-	}
-	output string
-}
-
-func (t *TestFmtWithMessage) UnmarshalInput(data []byte) error {
-	return json.Unmarshal(data, &t.input)
-}
-
-func (t *TestFmtWithMessage) Run() error {
-	var wrapped error
-	for _, e := range t.input.Errors {
-		if wrapped == nil {
-			wrapped = io.EOF
-			if e.Msg != "" {
-				wrapped = New(e.Msg)
-			}
-		} else {
-			wrapped = Wrap(wrapped, e.Msg)
+		if err := json.Unmarshal(data, &in); err != nil {
+			return nil, err
 		}
-	}
-	for i := 0; i < 1+t.input.ExtraMsgs; i++ {
-		wrapped = WithMessage(wrapped, fmt.Sprintf("addition%d", i))
-	}
 
-	t.output = fmt.Sprintf(t.input.Fmt, wrapped)
-	return nil
-}
+		var wrapped error
+		for _, e := range in.Errors {
+			if wrapped == nil {
+				wrapped = io.EOF
+				if e.Msg != "" {
+					wrapped = New(e.Msg)
+				}
+			} else {
+				wrapped = Wrap(wrapped, e.Msg)
+			}
+		}
+		for i := 0; i < 1+in.ExtraStacks; i++ {
+			wrapped = WithStack(wrapped)
+		}
 
-func (t *TestFmtWithMessage) MarshalOutput() ([]byte, error) {
-	return []byte(cleanupErrorStackTraces(t.output)), nil
+		out := fmt.Sprintf(in.Fmt, wrapped)
+		return []byte(cleanupErrorStackTraces(out)), nil
+	})
 }
 
 func TestFormatWithMessage(t *testing.T) {
-	agenda.Run(t, "testdata/format/withmessage", &TestFmtWithMessage{})
-}
+	agenda.Run(t, "testdata/format/withmessage", func(path string, data []byte) ([]byte, error) {
+		in := struct {
+			Errors []struct {
+				Msg string `json:"msg"`
+			} `json:"errors"`
+			ExtraMsgs int    `json:"extra_msgs"`
+			Fmt       string `json:"format"`
+		}{}
 
-// Test multiple wrappers at once
-
-type TestFmtGeneric struct {
-	input struct {
-		Errors []struct {
-			Msg string `json:"msg"`
-		} `json:"errors"`
-		Fmt string `json:"format"`
-	}
-	output string
-}
-
-func (t *TestFmtGeneric) UnmarshalInput(data []byte) error {
-	return json.Unmarshal(data, &t.input)
-}
-
-func (t *TestFmtGeneric) Run() error {
-	var wrapped error
-	for _, e := range t.input.Errors {
-		if wrapped == nil {
-			wrapped = io.EOF
-			if e.Msg != "" {
-				wrapped = New(e.Msg)
-			}
-		} else {
-			wrapped = Wrap(wrapped, e.Msg)
+		if err := json.Unmarshal(data, &in); err != nil {
+			return nil, err
 		}
-	}
 
-	wrapped = WithMessage(wrapped, "with-message")
-	wrapped = WithStack(wrapped)
-	wrapped = Wrap(wrapped, "wrap-error")
-	wrapped = Wrapf(wrapped, "wrapf-error%d", 1)
+		var wrapped error
+		for _, e := range in.Errors {
+			if wrapped == nil {
+				wrapped = io.EOF
+				if e.Msg != "" {
+					wrapped = New(e.Msg)
+				}
+			} else {
+				wrapped = Wrap(wrapped, e.Msg)
+			}
+		}
+		for i := 0; i < 1+in.ExtraMsgs; i++ {
+			wrapped = WithMessage(wrapped, fmt.Sprintf("addition%d", i))
+		}
 
-	t.output = fmt.Sprintf(t.input.Fmt, wrapped)
-	return nil
-}
-
-func (t *TestFmtGeneric) MarshalOutput() ([]byte, error) {
-	return []byte(cleanupErrorStackTraces(t.output)), nil
+		out := fmt.Sprintf(in.Fmt, wrapped)
+		return []byte(cleanupErrorStackTraces(out)), nil
+	})
 }
 
 func TestFormatGeneric(t *testing.T) {
-	agenda.Run(t, "testdata/format/generic", &TestFmtGeneric{})
+	agenda.Run(t, "testdata/format/generic", func(path string, data []byte) ([]byte, error) {
+		in := struct {
+			Errors []struct {
+				Msg string `json:"msg"`
+			} `json:"errors"`
+			Fmt string `json:"format"`
+		}{}
+
+		if err := json.Unmarshal(data, &in); err != nil {
+			return nil, err
+		}
+
+		var wrapped error
+		for _, e := range in.Errors {
+			if wrapped == nil {
+				wrapped = io.EOF
+				if e.Msg != "" {
+					wrapped = New(e.Msg)
+				}
+			} else {
+				wrapped = Wrap(wrapped, e.Msg)
+			}
+		}
+
+		wrapped = WithMessage(wrapped, "with-message")
+		wrapped = WithStack(wrapped)
+		wrapped = Wrap(wrapped, "wrap-error")
+		wrapped = Wrapf(wrapped, "wrapf-error%d", 1)
+
+		out := fmt.Sprintf(in.Fmt, wrapped)
+		return []byte(cleanupErrorStackTraces(out)), nil
+	})
 }
 
 // Helper function to cleanup stack trace

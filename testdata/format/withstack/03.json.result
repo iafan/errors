@@ -1,5 +1,5 @@
 EOF
-github.com/<user>/errors.(*TestFmtWithStack).Run
+github.com/<user>/errors.TestFormatWithStack.func1
 	<path>/github.com/<user>/errors/format_test.go:<line>
 github.com/<user>/errors.TestFormatWithStack
 	<path>/github.com/<user>/errors/format_test.go:<line>
